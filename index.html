@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprehensive Unit Converter</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        /* CSS Variables for theming */
+        :root {
+            --bg-color: #121212;
+            --card-bg-color: #1E1E1E;
+            --text-color: #E0E0E0;
+            --primary-color: #03DAC6;
+            --secondary-text-color: #B3B3B3;
+            --border-color: #333;
+            --shadow-color: rgba(0, 0, 0, 0.4);
+            --icon-filter: invert(90%) sepia(13%) saturate(1352%) hue-rotate(179deg) brightness(119%) contrast(119%);
+        }
+
+        html[data-theme='light'] {
+            --bg-color: #F0F2F5;
+            --card-bg-color: #FFFFFF;
+            --text-color: #1c1c1e;
+            --primary-color: #007AFF;
+            --secondary-text-color: #6c757d;
+            --border-color: #dee2e6;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --icon-filter: invert(39%) sepia(58%) saturate(2878%) hue-rotate(206deg) brightness(104%) contrast(101%);
+        }
+
+        /* General Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 800px;
+        }
+
+        /* Header and Theme Toggle */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 600;
+        }
+
+        .theme-toggle {
+            cursor: pointer;
+            background: var(--card-bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        
+        .theme-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        .theme-toggle svg {
+            width: 20px;
+            height: 20px;
+            fill: var(--text-color);
+        }
+
+        #sun-icon { display: none; }
+        html[data-theme='light'] #sun-icon { display: block; }
+        html[data-theme='light'] #moon-icon { display: none; }
+
+        /* Main Converter Card */
+        .converter-card, .history-card {
+            background-color: var(--card-bg-color);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px var(--shadow-color);
+            margin-bottom: 2rem;
+            transition: background-color 0.3s ease;
+        }
+        
+        .category-selector {
+            margin-bottom: 2rem;
+        }
+        
+        .category-selector label {
+            display: block;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            color: var(--secondary-text-color);
+        }
+        
+        select, input[type="number"] {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        select:focus, input[type="number"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-color) 20%, transparent);
+        }
+
+        /* Conversion IO Area */
+        .conversion-io {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        
+        .io-box {
+            flex: 1;
+        }
+
+        .io-box label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .input-wrapper {
+            position: relative;
+            flex-grow: 1;
+        }
+        
+        .copy-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+            opacity: 0.6;
+            transition: opacity 0.2s, transform 0.2s;
+        }
+
+        .copy-btn svg {
+            width: 18px;
+            height: 18px;
+            filter: var(--icon-filter);
+        }
+
+        .copy-btn:hover {
+            opacity: 1;
+            transform: translateY(-50%) scale(1.1);
+        }
+        
+        .input-group select {
+            flex-basis: 150px;
+        }
+        
+        .swap-button {
+            background-color: var(--card-bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+        
+        .swap-button:hover {
+            background-color: var(--bg-color);
+            transform: rotate(180deg) scale(1.1);
+        }
+        
+        .swap-button svg {
+            width: 24px;
+            height: 24px;
+            filter: var(--icon-filter);
+        }
+
+        /* History Section */
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .history-header h2 {
+            font-size: 1.5rem;
+        }
+
+        #clear-history-btn {
+            background: none;
+            border: 1px solid var(--border-color);
+            color: var(--secondary-text-color);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        #clear-history-btn:hover {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        #history-list {
+            list-style: none;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        #history-list li {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--secondary-text-color);
+        }
+        
+        #history-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .no-history {
+            text-align: center;
+            color: var(--secondary-text-color);
+            padding: 2rem 0;
+        }
+        
+        /* Tooltip for copy button */
+        .tooltip {
+            position: absolute;
+            bottom: calc(100% + 5px);
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #333;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s, visibility 0.2s;
+            z-index: 10;
+        }
+        .copy-btn-wrapper {
+            position: relative;
+        }
+        .copy-btn-wrapper:hover .tooltip {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Gemini Feature Styles */
+        #gemini-feature {
+            border-top: 2px solid var(--primary-color);
+        }
+
+        .gemini-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .gemini-header h2 {
+            font-size: 1.5rem;
+            color: var(--text-color);
+        }
+
+        #get-fact-btn {
+            background-color: var(--primary-color);
+            color: var(--bg-color);
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-family: 'Poppins', sans-serif;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        #get-fact-btn:hover:not(:disabled) {
+            background-color: color-mix(in srgb, var(--primary-color) 85%, #fff);
+            transform: translateY(-2px);
+        }
+
+        #get-fact-btn:disabled {
+            background-color: var(--border-color);
+            color: var(--secondary-text-color);
+            cursor: not-allowed;
+        }
+
+        #fact-container {
+            background-color: var(--bg-color);
+            border-radius: 8px;
+            padding: 1rem;
+            min-height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: var(--secondary-text-color);
+        }
+
+        #fact-result {
+            color: var(--text-color);
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Loader Spinner */
+        #fact-loader {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .spinner {
+            border: 3px solid var(--border-color);
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem 0.5rem;
+            }
+            .header h1 {
+                font-size: 2rem;
+            }
+            .conversion-io {
+                flex-direction: column;
+            }
+            .swap-button {
+                margin: 1rem 0;
+                transform: rotate(90deg);
+            }
+            .swap-button:hover {
+                transform: rotate(270deg) scale(1.1);
+            }
+        }
+        
+        @media (max-width: 480px) {
+             .input-group {
+                flex-direction: column;
+                align-items: stretch;
+             }
+             .input-group select {
+                flex-basis: auto;
+             }
+        }
+
+        /* Footer and Social Links */
+        footer {
+            text-align: center;
+            padding: 2rem 0;
+            color: var(--secondary-text-color);
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1.5rem; /* Increased gap for better spacing */
+            margin-bottom: 1rem;
+        }
+
+        .social-links a {
+            display: inline-block;
+            transition: transform 0.3s ease;
+        }
+
+        .social-links a:hover {
+            transform: scale(1.2) translateY(-2px); /* Add a slight lift on hover */
+        }
+
+        .social-links svg {
+            width: 24px;
+            height: 24px;
+            filter: var(--icon-filter); /* Use the existing theme filter */
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>Unit Converter</h1>
+            <button class="theme-toggle" id="theme-toggle-btn" aria-label="Toggle theme">
+                <svg id="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 11.807A9.002 9.002 0 0 1 10.049 2a9.942 9.942 0 0 0-4.99 2.273A9.942 9.942 0 0 0 2.273 7.279a9.942 9.942 0 0 0-1.006 4.965A9.942 9.942 0 0 0 2.273 17.21a9.942 9.942 0 0 0 4.996 2.784A9.942 9.942 0 0 0 12.24 22a9.942 9.942 0 0 0 4.965-1.006 9.942 9.942 0 0 0 2.784-4.996A9.942 9.942 0 0 0 22 10.998c0-.053.001-.106.001-.159a6.996 6.996 0 0 1-10.001 1.01z"/></svg>
+                <svg id="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 9.998a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm0-4.001a1 1 0 0 1 1 1v2a1 1 0 1 1-2 0V7a1 1 0 0 1 1-1zm0 12.003a1 1 0 0 1 1 1v2a1 1 0 1 1-2 0v-2a1 1 0 0 1 1-1zm-6.364-7.64a1 1 0 0 1 .707-.293h2a1 1 0 1 1 0 2h-2a1 1 0 0 1-.707-1.707zm12.728 0a1 1 0 0 1 .707.293l-1.414 1.414a1 1 0 0 1-1.414-1.414l1.414-1.414a1 1 0 0 1 .707.119zm-9.193 6.076a1 1 0 0 1 0 1.414l-1.414 1.414a1 1 0 0 1-1.414-1.414l1.414-1.414a1 1 0 0 1 1.414 0zm9.193-7.49a1 1 0 0 1 0-1.414l1.414-1.414a1 1 0 0 1 1.414 1.414l-1.414 1.414a1 1 0 0 1-1.414 0z"/></svg>
+            </button>
+        </header>
+
+        <main>
+            <!-- Converter Card -->
+            <section class="converter-card">
+                <div class="category-selector">
+                    <label for="category">Category</label>
+                    <select id="category"></select>
+                </div>
+                
+                <div class="conversion-io">
+                    <!-- From Box -->
+                    <div class="io-box">
+                        <label for="from-value">From</label>
+                        <div class="input-group">
+                            <div class="input-wrapper">
+                                <input type="number" id="from-value" value="1">
+                                <div class="copy-btn-wrapper">
+                                    <button class="copy-btn" data-target="from-value">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+                                    </button>
+                                    <span class="tooltip">Copy</span>
+                                </div>
+                            </div>
+                            <select id="from-unit"></select>
+                        </div>
+                    </div>
+
+                    <!-- Swap Button -->
+                    <button class="swap-button" id="swap-btn" aria-label="Swap units">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6.99 11L3 15l3.99 4v-3H14v-2H6.99v-3zM21 9l-3.99-4v3H10v2h7.01v3L21 9z"/></svg>
+                    </button>
+
+                    <!-- To Box -->
+                    <div class="io-box">
+                        <label for="to-value">To</label>
+                        <div class="input-group">
+                            <div class="input-wrapper">
+                                <input type="number" id="to-value">
+                                <div class="copy-btn-wrapper">
+                                    <button class="copy-btn" data-target="to-value">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+                                    </button>
+                                    <span class="tooltip">Copy</span>
+                                </div>
+                            </div>
+                            <select id="to-unit"></select>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Gemini Fun Fact Generator -->
+            <section class="converter-card" id="gemini-feature">
+                <div class="gemini-header">
+                    <h2>✨ Fun Fact Generator</h2>
+                    <button id="get-fact-btn">Get Fun Fact</button>
+                </div>
+                <div id="fact-container">
+                    <p id="fact-placeholder">Click the button to get a fun fact about your current conversion!</p>
+                    <p id="fact-result" class="hidden"></p>
+                    <div id="fact-loader" class="hidden">
+                        <div class="spinner"></div>
+                        <span>Generating...</span>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- History Card -->
+            <section class="history-card">
+                <div class="history-header">
+                    <h2>Recent Conversions</h2>
+                    <button id="clear-history-btn">Clear History</button>
+                </div>
+                <ul id="history-list">
+                    <p class="no-history">No conversions yet.</p>
+                </ul>
+            </section>
+        </main>
+        
+        <!-- Footer with Social Media Links -->
+        <footer>
+            <div class="social-links">
+                <a href="https://www.instagram.com/girish_lade_/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                </a>
+                <a href="https://www.linkedin.com/in/girish-lade-075bba201/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+                </a>
+                <a href="https://github.com/girishlade111" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+                </a>
+                <a href="https://codepen.io/Girish-Lade-the-looper" target="_blank" rel="noopener noreferrer" aria-label="Codepen">
+                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"></polygon><line x1="12" y1="22" x2="12" y2="15.5"></line><polyline points="22 8.5 12 15.5 2 8.5"></polyline><polyline points="2 15.5 12 8.5 22 15.5"></polyline><line x1="12" y1="2" x2="12" y2="8.5"></line></svg>
+                </a>
+                <a href="mailto:girishlade111@gmail.com" aria-label="Email">
+                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                </a>
+            </div>
+            <p>Developed by Girish Lade</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- DATA ---
+            const units = {
+                Length: { base: 'Meters', values: { Meters: 1, Kilometers: 1000, Centimeters: 0.01, Millimeters: 0.001, Miles: 1609.34, Yards: 0.9144, Feet: 0.3048, Inches: 0.0254 }},
+                Mass: { base: 'Kilograms', values: { Kilograms: 1, Grams: 0.001, Milligrams: 1e-6, Tonnes: 1000, Pounds: 0.453592, Ounces: 0.0283495 }},
+                Temperature: { base: 'Celsius', values: { Celsius: 'Celsius', Fahrenheit: 'Fahrenheit', Kelvin: 'Kelvin' }},
+                Volume: { base: 'Liters', values: { Liters: 1, Milliliters: 0.001, 'Gallons (US)': 3.78541, 'Quarts (US)': 0.946353, 'Pints (US)': 0.473176, 'Cups (US)': 0.236588 }},
+                Area: { base: 'Square Meters', values: { 'Square Meters': 1, 'Square Kilometers': 1e6, 'Square Miles': 2.59e6, 'Square Yards': 0.836127, 'Square Feet': 0.092903, Acres: 4046.86 }},
+                Speed: { base: 'Meters/second', values: { 'Meters/second': 1, 'Kilometers/hour': 0.277778, 'Miles/hour': 0.44704, Knots: 0.514444 }},
+                Time: { base: 'Seconds', values: { Seconds: 1, Minutes: 60, Hours: 3600, Days: 86400, Weeks: 604800 }},
+                Data: { base: 'Bytes', values: { Bytes: 1, Kilobytes: 1024, Megabytes: 1048576, Gigabytes: 1073741824, Terabytes: 1099511627776 }},
+            };
+
+            // --- DOM ELEMENTS ---
+            const categorySelect = document.getElementById('category');
+            const fromValueInput = document.getElementById('from-value');
+            const toValueInput = document.getElementById('to-value');
+            const fromUnitSelect = document.getElementById('from-unit');
+            const toUnitSelect = document.getElementById('to-unit');
+            const swapBtn = document.getElementById('swap-btn');
+            const historyList = document.getElementById('history-list');
+            const clearHistoryBtn = document.getElementById('clear-history-btn');
+            const themeToggleBtn = document.getElementById('theme-toggle-btn');
+            const copyBtns = document.querySelectorAll('.copy-btn');
+            const getFactBtn = document.getElementById('get-fact-btn');
+            const factPlaceholder = document.getElementById('fact-placeholder');
+            const factResult = document.getElementById('fact-result');
+            const factLoader = document.getElementById('fact-loader');
+
+            let history = [];
+            const MAX_HISTORY = 7;
+
+            // --- INITIALIZATION ---
+            function init() {
+                loadTheme();
+                populateCategories();
+                loadHistory();
+                
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.has('category')) {
+                    initFromURL(urlParams);
+                } else {
+                    populateUnits();
+                }
+
+                convert(true);
+                addEventListeners();
+            }
+
+            // --- CORE FUNCTIONS ---
+
+            function populateCategories() {
+                categorySelect.innerHTML = Object.keys(units).map(cat => `<option>${cat}</option>`).join('');
+            }
+
+            function populateUnits() {
+                const category = categorySelect.value;
+                const unitKeys = Object.keys(units[category].values);
+                fromUnitSelect.innerHTML = unitKeys.map(unit => `<option>${unit}</option>`).join('');
+                toUnitSelect.innerHTML = unitKeys.map(unit => `<option>${unit}</option>`).join('');
+                fromUnitSelect.value = unitKeys[0];
+                toUnitSelect.value = unitKeys[1] || unitKeys[0];
+            }
+
+            function convert(isFromInput, saveToHistory = true) {
+                const category = categorySelect.value;
+                const fromUnit = fromUnitSelect.value;
+                const toUnit = toUnitSelect.value;
+                const fromValue = parseFloat(fromValueInput.value);
+                const toValue = parseFloat(toValueInput.value);
+                
+                if (isNaN(fromValue) && isNaN(toValue)) return;
+                
+                let result;
+                if (category === 'Temperature') {
+                    result = convertTemperature(isFromInput ? fromValue : toValue, isFromInput ? fromUnit : toUnit, isFromInput ? toUnit : fromUnit);
+                } else {
+                    result = convertStandard(isFromInput ? fromValue : toValue, isFromInput ? fromUnit : toUnit, isFromInput ? toUnit : fromUnit, category);
+                }
+                
+                if (typeof result !== 'number') {
+                    if (isFromInput) {
+                        toValueInput.value = '';
+                    } else {
+                        fromValueInput.value = '';
+                    }
+                    return;
+                }
+                
+                const finalResult = parseFloat(result.toFixed(5));
+
+                if (isFromInput) {
+                    toValueInput.value = finalResult;
+                } else {
+                    fromValueInput.value = finalResult;
+                }
+
+                if (saveToHistory && !isNaN(fromValue) && !isNaN(finalResult)) {
+                    updateHistory(
+                        fromValueInput.value, fromUnitSelect.value,
+                        toValueInput.value, toUnitSelect.value
+                    );
+                }
+                updateURL();
+            }
+
+            function convertStandard(value, fromUnit, toUnit, category) {
+                if (isNaN(value)) return '';
+                const fromFactor = units[category].values[fromUnit];
+                const toFactor = units[category].values[toUnit];
+                const baseValue = value * fromFactor;
+                return baseValue / toFactor;
+            }
+
+            function convertTemperature(value, fromUnit, toUnit) {
+                if (isNaN(value)) return '';
+                if (fromUnit === toUnit) return value;
+                let celsius;
+
+                switch(fromUnit) {
+                    case 'Celsius': celsius = value; break;
+                    case 'Fahrenheit': celsius = (value - 32) * 5 / 9; break;
+                    case 'Kelvin': celsius = value - 273.15; break;
+                }
+
+                switch(toUnit) {
+                    case 'Celsius': return celsius;
+                    case 'Fahrenheit': return (celsius * 9 / 5) + 32;
+                    case 'Kelvin': return celsius + 273.15;
+                }
+            }
+            
+            function swapUnits() {
+                [fromUnitSelect.value, toUnitSelect.value] = [toUnitSelect.value, fromUnitSelect.value];
+                [fromValueInput.value, toValueInput.value] = [toValueInput.value, fromValueInput.value];
+                convert(true);
+            }
+
+            // --- GEMINI API FEATURE ---
+            async function getFunFact() {
+                factLoader.classList.remove('hidden');
+                factPlaceholder.classList.add('hidden');
+                factResult.classList.add('hidden');
+                getFactBtn.disabled = true;
+
+                const fromVal = fromValueInput.value;
+                const fromU = fromUnitSelect.value;
+                const toVal = toValueInput.value;
+                const toU = toUnitSelect.value;
+
+                if (!fromVal || !toVal || isNaN(parseFloat(fromVal)) || isNaN(parseFloat(toVal))) {
+                    factResult.textContent = 'Please enter a valid conversion first.';
+                    factResult.classList.remove('hidden');
+                    factLoader.classList.add('hidden');
+                    getFactBtn.disabled = false;
+                    return;
+                }
+
+                const systemPrompt = "You are a fun and knowledgeable assistant. Your goal is to provide a single, short, and relatable fun fact about a unit conversion. Make it easy to understand for a general audience. Start the sentence directly without any preamble like 'Sure!' or 'Here is a fun fact'.";
+                const userQuery = `Provide a fun, one-sentence, relatable fact about converting ${fromVal} ${fromU} to ${toVal} ${toU}. For example, if the conversion is 10 kilometers to 6.21 miles, a good response would be: "A 10k run, which is about 6.2 miles, is a popular distance for charity races and a great goal for new runners." Make the fact interesting and relevant to the scale of the numbers.`;
+
+                const apiKey = ""; 
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+                const payload = {
+                    contents: [{ parts: [{ text: userQuery }] }],
+                    systemInstruction: { parts: [{ text: systemPrompt }] },
+                };
+
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) throw new Error(`API call failed with status: ${response.status}`);
+
+                    const result = await response.json();
+                    const candidate = result.candidates?.[0];
+
+                    if (candidate && candidate.content?.parts?.[0]?.text) {
+                        factResult.textContent = candidate.content.parts[0].text;
+                    } else {
+                        factResult.textContent = 'Could not generate a fun fact. Please try again.';
+                    }
+
+                } catch (error) {
+                    console.error('Gemini API call failed:', error);
+                    factResult.textContent = 'An error occurred while fetching the fact. Please check the console.';
+                } finally {
+                    factLoader.classList.add('hidden');
+                    factResult.classList.remove('hidden');
+                    getFactBtn.disabled = false;
+                }
+            }
+
+
+            // --- ADVANCED FEATURES ---
+            function updateHistory(fromVal, fromU, toVal, toU) {
+                const conversionString = `${fromVal} ${fromU} = ${toVal} ${toU}`;
+                if (history[0] === conversionString) return;
+                history.unshift(conversionString);
+                if (history.length > MAX_HISTORY) history.pop();
+                localStorage.setItem('converterHistory', JSON.stringify(history));
+                renderHistory();
+            }
+
+            function renderHistory() {
+                if (history.length === 0) {
+                    historyList.innerHTML = `<p class="no-history">No conversions yet.</p>`;
+                    return;
+                }
+                historyList.innerHTML = history.map(item => `<li>${item}</li>`).join('');
+            }
+            
+            function loadHistory() {
+                const storedHistory = localStorage.getItem('converterHistory');
+                if (storedHistory) {
+                    history = JSON.parse(storedHistory);
+                    renderHistory();
+                }
+            }
+
+            function clearHistory() {
+                history = [];
+                localStorage.removeItem('converterHistory');
+                renderHistory();
+            }
+
+            function toggleTheme() {
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                document.documentElement.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+            }
+
+            function loadTheme() {
+                const savedTheme = localStorage.getItem('theme') || 'dark';
+                document.documentElement.setAttribute('data-theme', savedTheme);
+            }
+
+            function updateURL() {
+                try {
+                    const params = new URLSearchParams();
+                    params.set('category', categorySelect.value);
+                    params.set('from', fromUnitSelect.value);
+                    params.set('to', toUnitSelect.value);
+                    params.set('value', fromValueInput.value);
+                    window.history.replaceState({}, '', `${window.location.pathname}?${params}`);
+                } catch (error) {
+                    console.warn("Could not update URL:", error);
+                }
+            }
+
+            function initFromURL(params) {
+                categorySelect.value = params.get('category') || Object.keys(units)[0];
+                populateUnits();
+                fromUnitSelect.value = params.get('from');
+                toUnitSelect.value = params.get('to');
+                fromValueInput.value = params.get('value');
+            }
+            
+            function copyToClipboard(e) {
+                const targetId = e.currentTarget.dataset.target;
+                const inputToCopy = document.getElementById(targetId);
+                const tempTextArea = document.createElement('textarea');
+                tempTextArea.value = inputToCopy.value;
+                document.body.appendChild(tempTextArea);
+                tempTextArea.select();
+                try {
+                    document.execCommand('copy');
+                    const tooltip = e.currentTarget.nextElementSibling;
+                    tooltip.textContent = 'Copied!';
+                    setTimeout(() => { tooltip.textContent = 'Copy'; }, 2000);
+                } catch (err) {
+                    console.error('Fallback: Oops, unable to copy', err);
+                    const tooltip = e.currentTarget.nextElementSibling;
+                    tooltip.textContent = 'Error!';
+                    setTimeout(() => { tooltip.textContent = 'Copy'; }, 2000);
+                }
+                document.body.removeChild(tempTextArea);
+            }
+            
+            function addEventListeners() {
+                categorySelect.addEventListener('change', () => {
+                    populateUnits();
+                    convert(true);
+                });
+                fromValueInput.addEventListener('input', () => convert(true));
+                toValueInput.addEventListener('input', () => convert(false));
+                fromUnitSelect.addEventListener('change', () => convert(true));
+                toUnitSelect.addEventListener('change', () => convert(true));
+                swapBtn.addEventListener('click', swapUnits);
+                clearHistoryBtn.addEventListener('click', clearHistory);
+                themeToggleBtn.addEventListener('click', toggleTheme);
+                copyBtns.forEach(btn => btn.addEventListener('click', copyToClipboard));
+                getFactBtn.addEventListener('click', getFunFact);
+            }
+
+            init();
+        });
+    </script>
+</body>
+</html>
+
